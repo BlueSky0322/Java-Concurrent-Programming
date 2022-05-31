@@ -9,9 +9,11 @@ package assignment;
  *
  * @author Ryan Ng
  */
+
+//enum class to hold constant variables.
 public enum PassengerRange {
-    MIN(20),
-    MAX(50);
+    MIN(10),
+    MAX(15);
     
     private final int noOfPassengers;
 

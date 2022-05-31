@@ -9,6 +9,8 @@ package assignment;
  *
  * @author Ryan Ng
  */
+
+//enum class to store plane states
 enum PlaneStates {
     WANTTOLAND,
     ONRUNWAYARRIVAL,

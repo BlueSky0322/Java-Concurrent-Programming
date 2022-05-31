@@ -12,8 +12,8 @@ import java.util.concurrent.Semaphore;
  *
  * @author Ryan Ng
  */
-public class Gate extends Thread {
 
+//Gate as a semaphore of size 2
+public class Gate {
     Semaphore gateSem = new Semaphore(2);
-
 }

@@ -11,6 +11,8 @@ import java.util.concurrent.Semaphore;
  *
  * @author Ryan Ng
  */
+
+//Runway as a semaphore of size 1
 public class Runway {
     Semaphore runwaySem = new Semaphore(1);
 }

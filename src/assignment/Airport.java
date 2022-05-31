@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Ryan Ng
  */
+
+//Airport class to hold airport max capacity and AtomicInteger for counting capacity
 public class Airport {
     final int MAX_CAPACITY = 2;
     AtomicInteger airportCapacity = new AtomicInteger(0);

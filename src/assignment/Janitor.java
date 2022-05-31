@@ -9,6 +9,7 @@ package assignment;
  *
  * @author Ryan Ng
  */
+
 public class Janitor extends Thread {
     
     Plane plane;
@@ -22,6 +23,7 @@ public class Janitor extends Thread {
     
     public void run() {
         try {
+            //various tasks being performed
             for (int i = 1; i < 4; i++) {
                 switch (i) {
                     case 1:
@@ -39,6 +41,6 @@ public class Janitor extends Thread {
         } catch (InterruptedException e) {
             System.out.println("Thread " + threadName + "interrupted.");
         }
-        System.out.println(threadName + " has finished cleaning.");
+        System.out.println("Plane " + plane.id + ": " +threadName + " has finished cleaning.");
     }
 }

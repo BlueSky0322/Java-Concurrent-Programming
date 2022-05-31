@@ -5,19 +5,15 @@
  */
 package assignment;
 
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  * @author Ryan Ng
  */
+
 public class Passenger extends Thread {
-    boolean movementState = true;
     
-    int threadCount;
+    private boolean movementState = true;
+    private int threadCount;
     
     Plane plane;
     PlaneStates state;
@@ -28,7 +24,7 @@ public class Passenger extends Thread {
         this.threadCount = passengerNo;
         this.plane = plane;
     }
-
+    
     public void run() {
         while (this.plane.state == PlaneStates.PASSENGERDISEMBARKING && movementState) 
         {
@@ -38,26 +34,30 @@ public class Passenger extends Thread {
             board(this.plane);
         }
     }
-
+    
+    //function to disembark passengers
     void disembark(Plane plane) {
         try {
             System.out.println("Passenger " + threadCount + ": I am disembarking from Plane " + plane.id + ".");
-            Thread.sleep((long) (Math.random() * 1000));
+            //sleep to simulate passengers getting off the plane at different intervals
+            Thread.sleep((int) (Math.random() * 1000));
             plane.passengerCount.decrementAndGet();
             this.movementState = false;
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Passenger.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
-
+    
+    //function to board passengers
     void board(Plane plane) {
         try {
             System.out.println("Passenger " + threadCount + ": I am boarding Plane " + plane.id + ".");
-            Thread.sleep((long) (Math.random() * 1000));
+            //sleep to simulate passengers boarding the plane at different intervals
+            Thread.sleep((int) (Math.random() * 1000));
             plane.passengerCount.decrementAndGet();
             this.movementState = false;
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Passenger.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

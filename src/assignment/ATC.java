@@ -6,13 +6,12 @@
 package assignment;
 
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author Ryan Ng
  */
+
 class ATC implements Runnable {
 
     FuelTruck fuelTruck;
@@ -23,6 +22,8 @@ class ATC implements Runnable {
      
     private boolean checkRunwayDepart = true;
     private final String threadName = "ATC: ";
+    
+    //linked list object to store list of planes waiting to land
     LinkedList<Plane> listOfPlanes;
 
     ATC(FuelTruck fuelTruck, Runway runway, Gate gate, Airport airport) {
@@ -36,7 +37,8 @@ class ATC implements Runnable {
     public void run() {
         System.out.println("ATC is online, ready to start simulation.");
     }
-
+    
+    //code to check availability of runway for ARRIVAL
     public void checkRunwayForArrival(Plane plane) {
         System.out.println(threadName + "Received landing request from Plane " + plane.id + ", checking available runways...");
         if (runway.runwaySem.availablePermits() != 0
@@ -58,22 +60,24 @@ class ATC implements Runnable {
             synchronized (listOfPlanes) {
                 try {
                     listOfPlanes.wait();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(ATC.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
-
+    
+    //function to check availability of runway for DEPARTURE
     public void checkRunwayForDeparture(Plane plane) {
         if (checkRunwayDepart) {
             System.out.println(threadName + "Received departure request from Plane " + plane.id + ", checking available runways...");
             checkRunwayDepart = false;
         }
         try {
+            //sleep to give planes waiting in queue priority for landing
             Plane.sleep(100);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ATC.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         if (runway.runwaySem.availablePermits() != 0) {
             System.out.println(threadName + "Runway is available for departure!");
@@ -87,7 +91,8 @@ class ATC implements Runnable {
             }
         }
     }
-
+    
+    //function to check availability of gate
     public void checkGate(Plane plane) {
         if (gate.gateSem.availablePermits() != 0) {
             System.out.println(threadName + "Gates are available.");
@@ -102,15 +107,16 @@ class ATC implements Runnable {
             }
         }
     }
-
+    
+    //function to check availability of fuel truck
     public void checkFuelTruck(Plane plane) {
-        //while (true) {
         if (fuelTruck.fuelTruckSem.availablePermits() != 0 && !plane.refueled) {
             System.out.println(threadName + "Fuel Truck is available!");
             try {
                 fuelTruck.fuelTruckSem.acquire();
                 System.out.println(threadName + "Plane " + plane.id + " is currently refuelling...");
-                plane.sleep(1000);
+                //sleep to simulate refuelling taking some time
+                plane.sleep(500);
                 fuelTruck.fuelTruckSem.release();
                 plane.refueled = true;
                 System.out.println("Refueled Plane " + plane.id + ".");
@@ -118,9 +124,9 @@ class ATC implements Runnable {
                 e.printStackTrace();
             }
         }
-        //}
     }
-
+    
+    //function to append plane object to a linked list queue
     public void addPlaneToQueue(Plane plane) {
         synchronized (listOfPlanes) {
             ((LinkedList<Plane>) listOfPlanes).offer(plane);
@@ -128,10 +134,11 @@ class ATC implements Runnable {
             System.out.println("Planes in queue now: " + listOfPlanes.size());
         }
     }
-
+    
+    //function that wakes thread to try and access runway
     public void landPlaneOnRunway() {
         synchronized (listOfPlanes) {
-            if (airport.airportCapacity.get() != airport.MAX_CAPACITY && listOfPlanes.size() != 0) {
+            if (airport.airportCapacity.get() != airport.MAX_CAPACITY && !listOfPlanes.isEmpty()) {
                 System.out.println(threadName + "Found a plane in queue.");
                 listOfPlanes.pollFirst();
                 listOfPlanes.notify();
