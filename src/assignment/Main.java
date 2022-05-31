@@ -21,7 +21,7 @@ public class Main {
             try {
                 Plane plane = new Plane(i, airport, atc);
                 plane.start();
-                Plane.sleep((long) (Math.random() * 30));
+                Plane.sleep((long) (Math.random() * 1000));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
