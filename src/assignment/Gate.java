@@ -13,5 +13,7 @@ import java.util.concurrent.Semaphore;
  * @author Ryan Ng
  */
 public class Gate extends Thread {
+
     Semaphore gateSem = new Semaphore(2);
+
 }
