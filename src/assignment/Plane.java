@@ -36,7 +36,6 @@ class Plane extends Thread {
             System.out.println("Plane " + this.id + " wants to land! Requesting permission from ATC...");
             atc.checkRunway(this);
         }
-
         while (this.state == PlaneStates.ONRUNWAYARRIVAL) {
             try {
                 for (int i = 1; i < 4; i++) {
@@ -56,23 +55,32 @@ class Plane extends Thread {
             } catch (Throwable e) {
                 e.printStackTrace();
             }
+            System.out.println("Plane " + this.id + " is waiting for available gates...");
             atc.checkGate(this);
         }
 
         while (this.state == PlaneStates.ATGATE) {
-            System.out.println("Gate ternminals are opening...");
+            System.out.println("Plane " + this.id + " successfully docked at gate...");
             System.out.println("Plane " + this.id + " getting ready to disembark its passengers...");
             this.state = PlaneStates.PASSENGERDISEMBARKING;
         }
 
         while (this.state == PlaneStates.PASSENGERDISEMBARKING) {
             //for (int i = 1; i <= this.noOfPassenger; i++) {
-            Passenger passenger = new Passenger(this);
-            passenger.start();
+            System.out.println("Passengers waiting to disembark Plane " + this.id + ": " + this.noOfPassenger);
+            for (int i = 1; i <= this.noOfPassenger; i++) {
+                Passenger passenger = new Passenger(i, this);
+                passenger.start();
+                passenger.passengerCount.set(this.noOfPassenger);
+//                if (passenger.passengerCount.get() == 0) {
+//                    System.out.println("All passengers have disembarked Plane " + this.id + ".");
+//                    //this.state = PlaneStates.PASSENGERONBOARDING;
+//                }
+            }
         }
 
         while (this.state == PlaneStates.PASSENGERONBOARDING) {
-            
+
         }
     }
 
