@@ -27,7 +27,7 @@ public class Main {
             }
         }
 
-        System.out.println("Planes in queue now: " + airport.listOfPlanes.size());
+        System.out.println("Planes in queue now: " + atc.listOfPlanes.size());
 //        ATC atc = new ATC(runway, gate, airport);
 //        Thread atcThread = new Thread(atc);
 //        atcThread.start();
