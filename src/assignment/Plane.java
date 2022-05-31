@@ -62,7 +62,7 @@ class Plane extends Thread {
                             System.out.println("Plane " + this.id + " is coasting to the gate terminals...");
                             break;
                     }
-                    //sleep to simulate time taken to perform each task
+                    //sleep to simulate time taken to perform each landing task
                     Thread.sleep(1000);
                 }
             } catch (InterruptedException e) {
@@ -198,7 +198,7 @@ class Plane extends Thread {
                             System.out.println("Plane " + this.id + " is gaining altitude...");
                             break;
                     }
-                    //sleep to simulate time taken to perform each task
+                    //sleep to simulate time taken to perform departure tasks
                     Thread.sleep(1000);
                 }
             } catch (InterruptedException e) {
