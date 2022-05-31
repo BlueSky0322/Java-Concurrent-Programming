@@ -75,12 +75,11 @@ class ATC implements Runnable {
     }
 
     public void checkGate(Plane plane) {
-        System.out.println(threadName + "Plane " + plane.id + " is waiting for available gates...");
         if (gate.gateSem.availablePermits() != 0) {
-            System.out.println("Gates are available.");
+            System.out.println(threadName + "Gates are available.");
             try {
                 gate.gateSem.acquire();
-                System.out.println("Plane " + plane.id + " has taken a Gate.");
+                System.out.println(threadName + "Plane " + plane.id + " has taken a gate, runway is now available again.");
                 runway.runwaySem.release();
                 landPlaneOnRunway(plane);
                 plane.state = PlaneStates.ATGATE;
@@ -93,7 +92,7 @@ class ATC implements Runnable {
     synchronized void addPlaneToQueue(Plane plane) {
         synchronized (listOfPlanes) {
             ((LinkedList<Plane>) listOfPlanes).offer(plane);
-            System.out.println("Plane " + plane.id + " has been entered into waiting queue.");
+            System.out.println(threadName + "Plane " + plane.id + " has been entered into waiting queue.");
 
 //            if (listOfPlanes.size() == 0) {
 //                listOfPlanes.notify();
@@ -104,7 +103,7 @@ class ATC implements Runnable {
     public void landPlaneOnRunway(Plane plane) {
         synchronized (listOfPlanes) {
             if (airport.airportCapacity.get() != airport.MAX_CAPACITY) {
-                System.out.println("ATC found a plane in queue.");
+                System.out.println(threadName + "Found a plane in queue.");
                 listOfPlanes.pollFirst();
                 listOfPlanes.notify();
             }
