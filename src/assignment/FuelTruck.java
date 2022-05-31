@@ -13,9 +13,4 @@ import java.util.concurrent.Semaphore;
  */
 public class FuelTruck {
     Semaphore fuelTruckSem = new Semaphore(1);
-    
-    public void run()
-    {
-        
-    }
 }
