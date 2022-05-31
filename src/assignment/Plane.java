@@ -5,6 +5,7 @@
  */
 package assignment;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +22,7 @@ class Plane extends Thread {
     PlaneStates state;
     Airport airport;
     ATC atc;
+    AtomicInteger passengerCount = new AtomicInteger(0);
 
     Plane(int id, Airport airport, ATC atc) {
         this.id = id;
@@ -66,16 +68,20 @@ class Plane extends Thread {
         }
 
         while (this.state == PlaneStates.PASSENGERDISEMBARKING) {
-            //for (int i = 1; i <= this.noOfPassenger; i++) {
-            System.out.println("Passengers waiting to disembark Plane " + this.id + ": " + this.noOfPassenger);
-            for (int i = 1; i <= this.noOfPassenger; i++) {
+            this.passengerCount.set(noOfPassenger);
+            System.out.println("Passengers waiting to disembark Plane " + this.id + ": " + noOfPassenger);
+            for (int i = 1; i <= noOfPassenger; i++) {
                 Passenger passenger = new Passenger(i, this);
                 passenger.start();
-                passenger.passengerCount.set(this.noOfPassenger);
-//                if (passenger.passengerCount.get() == 0) {
-//                    System.out.println("All passengers have disembarked Plane " + this.id + ".");
-//                    //this.state = PlaneStates.PASSENGERONBOARDING;
-//                }
+                try {
+                    passenger.join();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Plane.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            if (this.passengerCount.get() == 0) {
+                System.out.println("All passengers have disembarked Plane " + this.id + ".");
+                this.state = PlaneStates.PASSENGERONBOARDING;
             }
         }
 
