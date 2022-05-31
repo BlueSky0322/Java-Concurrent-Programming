@@ -9,11 +9,11 @@ package assignment;
  *
  * @author Ryan Ng
  */
-public class Main {
-
+public class Main { 
     public static void main(String[] args) {
         Runway runway = new Runway();
         Gate gate = new Gate();
+        gate.start();
         Airport airport = new Airport();
         ATC atc = new ATC(runway, gate, airport);
         
@@ -26,8 +26,7 @@ public class Main {
                 e.printStackTrace();
             }
         }
-
-        System.out.println("Planes in queue now: " + atc.listOfPlanes.size());
+        System.out.println("Planes in queue now: " + atc.listOfPlanes.toString());
 //        ATC atc = new ATC(runway, gate, airport);
 //        Thread atcThread = new Thread(atc);
 //        atcThread.start();
