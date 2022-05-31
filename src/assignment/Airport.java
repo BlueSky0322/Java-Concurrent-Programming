@@ -16,33 +16,6 @@ import java.util.logging.Logger;
  * @author Ryan Ng
  */
 public class Airport {
-
-    //Airport capacity
     final int MAX_CAPACITY = 2;
-    //static int currentCapacity = 0;
     AtomicInteger airportCapacity = new AtomicInteger(0);
-
-    //LinkedList<Plane> listOfPlanes;
-
-    public Airport() {
-        
-    }
-
-
-
-    
-    
-
-//    public void addToAirportQueue(Plane p)
-//    {
-//        
-//        if(airportCapacity.get() != MAX_CAPACITY){
-//            System.out.println("Airport Capacity: " + airportCapacity.incrementAndGet());
-//            System.out.println("Airport is not full. Awaiting landing requests."); 
-//            listOfPlanes.add(p);
-//        }
-//        else{
-//            System.out.println("Airport is full! Please wait in queue.");
-//        }
-//    }
 }
