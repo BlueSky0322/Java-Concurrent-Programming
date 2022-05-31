@@ -41,6 +41,7 @@ class ATC implements Runnable {
     //code to check availability of runway for ARRIVAL
     public void checkRunwayForArrival(Plane plane) {
         System.out.println(threadName + "Received landing request from Plane " + plane.id + ", checking available runways...");
+        //Plane only given runway if and only if runway permits available and airport capacity not full
         if (runway.runwaySem.availablePermits() != 0
                 && airport.airportCapacity.get() != airport.MAX_CAPACITY) {
             System.out.println(threadName + "Runway is available for arrival!");
@@ -52,7 +53,9 @@ class ATC implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } else {
+        } 
+        //otherwise, add plane to a waiting queue
+        else {
             if (listOfPlanes.indexOf(plane) == -1) {
                 System.out.println(threadName + "The airport is full now, please wait in queue.");
                 addPlaneToQueue(plane);
