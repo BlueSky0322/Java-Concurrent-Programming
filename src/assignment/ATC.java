@@ -5,6 +5,7 @@
  */
 package assignment;
 
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,69 +21,89 @@ class ATC implements Runnable {
     Airport airport;
     PlaneStates state;
 
-    ATC( Runway runway, Gate gate, Airport airport) {
+    private final String threadName = "ATC: ";
+    LinkedList<Plane> listOfPlanes;
+
+    ATC(Runway runway, Gate gate, Airport airport) {
         //this.plane = plane;
         this.runway = runway;
         this.gate = gate;
         this.airport = airport;
+        listOfPlanes = new LinkedList<Plane>();
     }
 
-    public void run() { 
-        while (plane.state == PlaneStates.WANTTOLAND) {
-            System.out.println("Plane " + plane.id + " wants to land! Checking available runways...");
-            if (runway.runwaySem.availablePermits() != 0
-                    //&& airport.listOfPlanes.peek() == plane
-                    && airport.airportCapacity.get() != airport.MAX_CAPACITY) {
-                System.out.println("Runway is available");
-                try {
-                    airport.landPlaneOnRunway();
-                    runway.runwaySem.acquire();
-                    airport.airportCapacity.incrementAndGet();
-                    System.out.println("Plane " + plane.id + " has taken runway.");
-                    plane.state = PlaneStates.ONRUNWAYARRIVAL;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+    public void run() {
+//        while (plane.state == PlaneStates.PASSENGERDISEMBARKING) {
+//            Passenger passenger = new Passenger(plane);
+//            passenger.run();
+//            plane.state = PlaneStates.PASSENGERONBOARDING;
+//        }
+//        while (plane.state == PlaneStates.PASSENGERONBOARDING) {
+//            Passenger passenger = new Passenger(plane);
+//            passenger.run();
+//            plane.state = PlaneStates.LEAVEGATE;
+//        }
+    }
+
+    public void checkRunway(Plane plane) {
+        System.out.println(threadName + "Received landing request from Plane " + plane.id + ", checking available runways...");
+        if (runway.runwaySem.availablePermits() != 0
+                //&& airport.listOfPlanes.peek() == plane
+                && airport.airportCapacity.get() != airport.MAX_CAPACITY) {
+            System.out.println(threadName + "Runway is available!");
+            try {
+                runway.runwaySem.acquire();
+                airport.airportCapacity.incrementAndGet();
+                System.out.println(threadName + "Plane " + plane.id + " has taken runway.");
+                plane.state = PlaneStates.ONRUNWAYARRIVAL;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            else
-            {
-                try { 
-                    plane.wait();
+        } else {
+            System.out.println(threadName + "The airport is full now, please wait in queue.");
+            addPlaneToQueue(plane);
+                synchronized (listOfPlanes){
+                try {
+                    listOfPlanes.wait();
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ATC.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-                
         }
-        while (plane.state == PlaneStates.ONRUNWAYARRIVAL) {
-            System.out.println("Plane " + plane.id + " is waiting for available gates...");
-            if (gate.gateSem.availablePermits() != 0) {
-                System.out.println("Gates are available.");
-                try {
-                    gate.gateSem.acquire();
-                    System.out.println("Plane " + plane.id + " has taken a Gate.");
-                    runway.runwaySem.release();
+    }
 
-                    plane.state = PlaneStates.ATGATE;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+    public void checkGate(Plane plane) {
+        System.out.println(threadName +"Plane " + plane.id + " is waiting for available gates...");
+        if (gate.gateSem.availablePermits() != 0) {
+            System.out.println("Gates are available.");
+            try {
+                gate.gateSem.acquire();
+                System.out.println("Plane " + plane.id + " has taken a Gate.");
+                runway.runwaySem.release();
+
+                plane.state = PlaneStates.ATGATE;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        while (plane.state == PlaneStates.ATGATE) {
-            System.out.println("Plane " + plane.id + " getting ready to disembark its passengers...");
-            System.out.println("Gate ternminals are opening...");
-            plane.state = PlaneStates.PASSENGERDISEMBARKING;
+    }
+
+    public void addPlaneToQueue(Plane p) {
+        synchronized (listOfPlanes) {
+            ((LinkedList<Plane>) listOfPlanes).offer(p);
+            System.out.println("Plane " + p.id + " has been entered into waiting queue.");
+
+            if (listOfPlanes.size() == 0) {
+                listOfPlanes.notify();
+            }
         }
-        while (plane.state == PlaneStates.PASSENGERDISEMBARKING) {
-            Passenger passenger = new Passenger(plane);
-            passenger.run();
-            plane.state = PlaneStates.PASSENGERONBOARDING;
-        }
-        while (plane.state == PlaneStates.PASSENGERONBOARDING) {
-            Passenger passenger = new Passenger(plane);
-            passenger.run();
-            plane.state = PlaneStates.LEAVEGATE;
+    }
+
+    public void landPlaneOnRunway(Plane plane) {
+        synchronized (listOfPlanes) {
+            System.out.println("ATC found a plane in queue.");
+            //listOfPlanes.notify();
+            plane = (Plane) ((LinkedList<?>) listOfPlanes).pollFirst();
         }
     }
 }
