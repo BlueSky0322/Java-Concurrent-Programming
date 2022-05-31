@@ -15,17 +15,18 @@ import java.util.logging.Logger;
  */
 class ATC implements Runnable {
 
-    //Plane plane;
+    FuelTruck fuelTruck;
     Runway runway;
     Gate gate;
     Airport airport;
     PlaneStates state;
-
+     
+    private boolean checkRunwayDepart = true;
     private final String threadName = "ATC: ";
     LinkedList<Plane> listOfPlanes;
 
-    ATC(Runway runway, Gate gate, Airport airport) {
-        //this.plane = plane;
+    ATC(FuelTruck fuelTruck, Runway runway, Gate gate, Airport airport) {
+        this.fuelTruck = fuelTruck;
         this.runway = runway;
         this.gate = gate;
         this.airport = airport;
@@ -33,28 +34,18 @@ class ATC implements Runnable {
     }
 
     public void run() {
-//        while (plane.state == PlaneStates.PASSENGERDISEMBARKING) {
-//            Passenger passenger = new Passenger(plane);
-//            passenger.run();
-//            plane.state = PlaneStates.PASSENGERONBOARDING;
-//        }
-//        while (plane.state == PlaneStates.PASSENGERONBOARDING) {
-//            Passenger passenger = new Passenger(plane);
-//            passenger.run();
-//            plane.state = PlaneStates.LEAVEGATE;
-//        }
+        System.out.println("ATC is online, ready to start simulation.");
     }
 
-    public void checkRunway(Plane plane) {
+    public void checkRunwayForArrival(Plane plane) {
         System.out.println(threadName + "Received landing request from Plane " + plane.id + ", checking available runways...");
         if (runway.runwaySem.availablePermits() != 0
-                //&& listOfPlanes.peek() == plane
                 && airport.airportCapacity.get() != airport.MAX_CAPACITY) {
-            System.out.println(threadName + "Runway is available!");
+            System.out.println(threadName + "Runway is available for arrival!");
             try {
                 runway.runwaySem.acquire();
                 airport.airportCapacity.incrementAndGet();
-                System.out.println(threadName + "Plane " + plane.id + " has taken runway.");
+                System.out.println(threadName + "Plane " + plane.id + " has taken runway for arrival.");
                 plane.state = PlaneStates.ONRUNWAYARRIVAL;
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -74,6 +65,29 @@ class ATC implements Runnable {
         }
     }
 
+    public void checkRunwayForDeparture(Plane plane) {
+        if (checkRunwayDepart) {
+            System.out.println(threadName + "Received departure request from Plane " + plane.id + ", checking available runways...");
+            checkRunwayDepart = false;
+        }
+        try {
+            Plane.sleep(100);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ATC.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (runway.runwaySem.availablePermits() != 0) {
+            System.out.println(threadName + "Runway is available for departure!");
+            try {
+                runway.runwaySem.acquire();
+                System.out.println(threadName + "Plane " + plane.id + " has taken runway for departure.");
+                plane.state = PlaneStates.ONRUNWAYDEPARTURE;
+                checkRunwayDepart = true;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void checkGate(Plane plane) {
         if (gate.gateSem.availablePermits() != 0) {
             System.out.println(threadName + "Gates are available.");
@@ -81,37 +95,48 @@ class ATC implements Runnable {
                 gate.gateSem.acquire();
                 System.out.println(threadName + "Plane " + plane.id + " has taken a gate, runway is now available again.");
                 runway.runwaySem.release();
-                landPlaneOnRunway(plane);
+                landPlaneOnRunway();
                 plane.state = PlaneStates.ATGATE;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-    }    
-    
-    synchronized void addPlaneToQueue(Plane plane) {
+    }
+
+    public void checkFuelTruck(Plane plane) {
+        //while (true) {
+        if (fuelTruck.fuelTruckSem.availablePermits() != 0 && !plane.refueled) {
+            System.out.println(threadName + "Fuel Truck is available!");
+            try {
+                fuelTruck.fuelTruckSem.acquire();
+                System.out.println(threadName + "Plane " + plane.id + " is currently refuelling...");
+                plane.sleep(1000);
+                fuelTruck.fuelTruckSem.release();
+                plane.refueled = true;
+                System.out.println("Refueled Plane " + plane.id + ".");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        //}
+    }
+
+    public void addPlaneToQueue(Plane plane) {
         synchronized (listOfPlanes) {
             ((LinkedList<Plane>) listOfPlanes).offer(plane);
             System.out.println(threadName + "Plane " + plane.id + " has been entered into waiting queue.");
-
-//            if (listOfPlanes.size() == 0) {
-//                listOfPlanes.notify();
-//            }
+            System.out.println("Planes in queue now: " + listOfPlanes.size());
         }
     }
 
-    public void landPlaneOnRunway(Plane plane) {
+    public void landPlaneOnRunway() {
         synchronized (listOfPlanes) {
-            if (airport.airportCapacity.get() != airport.MAX_CAPACITY) {
+            if (airport.airportCapacity.get() != airport.MAX_CAPACITY && listOfPlanes.size() != 0) {
                 System.out.println(threadName + "Found a plane in queue.");
                 listOfPlanes.pollFirst();
                 listOfPlanes.notify();
-            }
-            else
-                try {
-                    listOfPlanes.wait();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ATC.class.getName()).log(Level.SEVERE, null, ex);
+            } else {
+                System.out.println(threadName + "Queue empty. Simulation has ended.");
             }
         }
     }
