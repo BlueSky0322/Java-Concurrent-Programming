@@ -11,11 +11,12 @@ package assignment;
  */
 public class Main { 
     public static void main(String[] args) {
+        FuelTruck fuelTruck = new FuelTruck();
         Runway runway = new Runway();
         Gate gate = new Gate();
-        gate.start();
         Airport airport = new Airport();
-        ATC atc = new ATC(runway, gate, airport);
+        ATC atc = new ATC(fuelTruck, runway, gate, airport);
+        atc.run();
         
         for (int i = 1; i <= 6; i++) {
             try {
@@ -26,10 +27,12 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        System.out.println("Planes in queue now: " + atc.listOfPlanes.toString());
-//        ATC atc = new ATC(runway, gate, airport);
-//        Thread atcThread = new Thread(atc);
-//        atcThread.start();
-
+        
+        
+        try {
+            Thread.sleep(60000);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 }
