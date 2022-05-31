@@ -18,7 +18,7 @@ public class Passenger extends Thread {
     boolean movementState = true;
     
     int threadCount;
-    int passengersToBoard;
+    
     Plane plane;
     PlaneStates state;
     PassengerRange pr;
@@ -26,7 +26,6 @@ public class Passenger extends Thread {
 
     Passenger(int passengerNo, Plane plane) {
         this.threadCount = passengerNo;
-        this.passengersToBoard = (int) Math.floor(Math.random() * (PassengerRange.MAX.getValue() - PassengerRange.MIN.getValue() + 1) + PassengerRange.MIN.getValue());
         this.plane = plane;
     }
 
@@ -35,15 +34,9 @@ public class Passenger extends Thread {
         {
             disembark(this.plane);
         }
-//        while (plane.state == PlaneStates.PASSENGERONBOARDING) {
-//            System.out.println("Passengers waiting to board Plane " + plane.id + ": " + this.passengersToBoard);
-//            this.passengerCount.set(this.passengersToBoard);
-//            board(plane);
-//            if (this.passengerCount.get() == 0) {
-//                System.out.println("All passengers have boarded Plane " + plane.id + ".");
-//                plane.state = PlaneStates.LEAVEGATE;
-//            }
-//        }
+        while (plane.state == PlaneStates.PASSENGERONBOARDING && movementState) {
+            board(this.plane);
+        }
     }
 
     void disembark(Plane plane) {
@@ -57,11 +50,14 @@ public class Passenger extends Thread {
         }
     }
 
-//    void board(Plane plane) {
-//        for (int i = 1; i <= this.passengersToBoard; i++) {
-//            System.out.println("Thread - Passenger " + i + ": I am boarding Plane " + plane.id + ".");
-//            this.passengerCount.decrementAndGet();
-//        }
-//    }
-
+    void board(Plane plane) {
+        try {
+            System.out.println("Passenger " + threadCount + ": I am boarding Plane " + plane.id + ".");
+            Thread.sleep((long) (Math.random() * 1000));
+            plane.passengerCount.decrementAndGet();
+            this.movementState = false;
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Passenger.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
