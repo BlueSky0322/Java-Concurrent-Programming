@@ -12,12 +12,5 @@ import java.util.concurrent.Semaphore;
  * @author Ryan Ng
  */
 public class Runway {
-
-    
     Semaphore runwaySem = new Semaphore(1);
-    
-    public void onRunway() 
-    {
-        
-    }
 }
