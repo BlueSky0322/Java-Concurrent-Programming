@@ -10,7 +10,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  *
- * @author Ryan Ng
+ * @author Ng Lum Thyn TP061914
  */
 
 //Gate as a semaphore of size 2

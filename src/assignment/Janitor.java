@@ -7,7 +7,7 @@ package assignment;
 
 /**
  *
- * @author Ryan Ng
+ * @author Ng Lum Thyn TP061914
  */
 
 public class Janitor extends Thread {

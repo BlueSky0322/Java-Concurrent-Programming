@@ -9,10 +9,10 @@ import java.util.concurrent.Semaphore;
 
 /**
  *
- * @author Ryan Ng
+ * @author Ng Lum Thyn TP061914
  */
 
-//FuelTruck as a semaphore of size 2
+//FuelTruck as a semaphore of size 1
 public class FuelTruck {
     Semaphore fuelTruckSem = new Semaphore(1);
 }

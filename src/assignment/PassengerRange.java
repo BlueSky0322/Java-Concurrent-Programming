@@ -7,10 +7,10 @@ package assignment;
 
 /**
  *
- * @author Ryan Ng
+ * @author Ng Lum Thyn TP061914
  */
 
-//enum class to hold constant variables.
+//enum class to hold constant variables of MAX and MIN passengers.
 public enum PassengerRange {
     MIN(10),
     MAX(15);

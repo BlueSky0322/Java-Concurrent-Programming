@@ -9,7 +9,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  *
- * @author Ryan Ng
+ * @author Ng Lum Thyn TP061914
  */
 
 //Runway as a semaphore of size 1

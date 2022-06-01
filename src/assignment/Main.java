@@ -7,7 +7,7 @@ package assignment;
 
 /**
  *
- * @author Ryan Ng
+ * @author Ng Lum Thyn TP061914
  */
 
 public class Main { 
@@ -16,15 +16,16 @@ public class Main {
         Runway runway = new Runway();
         Gate gate = new Gate();
         Airport airport = new Airport();
+        Statistics stat = new Statistics();
         
         //start ATC thread
-        ATC atc = new ATC(fuelTruck, runway, gate, airport);
+        ATC atc = new ATC(fuelTruck, runway, gate, airport, stat);
         atc.run();
         
         //generating 6 plane threads using for loop
         for (int i = 1; i <= 6; i++) {
             try {
-                Plane plane = new Plane(i, airport, atc);
+                Plane plane = new Plane(i, airport, atc, stat);
                 plane.start();
                 //sleep to simulate plans coming in 1,2 or 3 second intervals.
                 Plane.sleep((int) (Math.random() * 2001) + 1000);
