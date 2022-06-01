@@ -11,7 +11,6 @@ import java.util.LinkedList;
  *
  * @author Ryan Ng
  */
-
 class ATC implements Runnable {
 
     FuelTruck fuelTruck;
@@ -19,25 +18,26 @@ class ATC implements Runnable {
     Gate gate;
     Airport airport;
     PlaneStates state;
-     
+    Statistics stat;
     private boolean checkRunwayDepart = true;
     private final String threadName = "ATC: ";
-    
+
     //linked list object to store list of planes waiting to land
     LinkedList<Plane> listOfPlanes;
 
-    ATC(FuelTruck fuelTruck, Runway runway, Gate gate, Airport airport) {
+    ATC(FuelTruck fuelTruck, Runway runway, Gate gate, Airport airport, Statistics stat) {
         this.fuelTruck = fuelTruck;
         this.runway = runway;
         this.gate = gate;
         this.airport = airport;
+        this.stat = stat;
         listOfPlanes = new LinkedList<Plane>();
     }
 
     public void run() {
         System.out.println("ATC is online, ready to start simulation.");
     }
-    
+
     //code to check availability of runway for ARRIVAL
     public void checkRunwayForArrival(Plane plane) {
         System.out.println(threadName + "Received landing request from Plane " + plane.id + ", checking available runways...");
@@ -53,13 +53,15 @@ class ATC implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } 
-        //otherwise, add plane to a waiting queue
+        } //otherwise, add plane to a waiting queue
         else {
             if (listOfPlanes.indexOf(plane) == -1) {
-                System.out.println(threadName + "The airport is full now, please wait in queue.");
-                addPlaneToQueue(plane);
+                if(airport.airportCapacity.get() != airport.MAX_CAPACITY)
+                    System.out.println(threadName + "The runway is occupied, please wait in queue.");
+                else if (airport.airportCapacity.get() == airport.MAX_CAPACITY)
+                    System.out.println(threadName + "The airport is occupied, please wait in queue.");
             }
+            addPlaneToQueue(plane);
             synchronized (listOfPlanes) {
                 try {
                     listOfPlanes.wait();
@@ -69,7 +71,7 @@ class ATC implements Runnable {
             }
         }
     }
-    
+
     //function to check availability of runway for DEPARTURE
     public void checkRunwayForDeparture(Plane plane) {
         if (checkRunwayDepart) {
@@ -94,7 +96,7 @@ class ATC implements Runnable {
             }
         }
     }
-    
+
     //function to check availability of gate
     public void checkGate(Plane plane) {
         if (gate.gateSem.availablePermits() != 0) {
@@ -110,7 +112,7 @@ class ATC implements Runnable {
             }
         }
     }
-    
+
     //function to check availability of fuel truck
     public void checkFuelTruck(Plane plane) {
         if (fuelTruck.fuelTruckSem.availablePermits() != 0 && !plane.refueled) {
@@ -128,24 +130,37 @@ class ATC implements Runnable {
             }
         }
     }
-    
+
     //function to append plane object to a linked list queue
     public void addPlaneToQueue(Plane plane) {
         synchronized (listOfPlanes) {
             ((LinkedList<Plane>) listOfPlanes).offer(plane);
+            
+            //set start time on timer
+            stat.setStartTime(System.nanoTime());
+            
             System.out.println(threadName + "Plane " + plane.id + " has been entered into waiting queue.");
             System.out.println("Planes in queue now: " + listOfPlanes.size());
         }
     }
-    
+
     //function that wakes thread to try and access runway
     public void landPlaneOnRunway() {
         synchronized (listOfPlanes) {
             if (airport.airportCapacity.get() != airport.MAX_CAPACITY && !listOfPlanes.isEmpty()) {
                 System.out.println(threadName + "Found a plane in queue.");
+                System.out.println(threadName + "Listening for landing requests...");
                 listOfPlanes.pollFirst();
+                
+                //set end time on timer
+                stat.setEndTime(System.nanoTime());
+                stat.calculateDuration();
+                
                 listOfPlanes.notify();
-            } else {
+            } else if (airport.airportCapacity.get() == airport.MAX_CAPACITY && !listOfPlanes.isEmpty()) {
+                System.out.println(threadName + "Both gates are now occupied, airport full.");
+                System.out.println(threadName + "Planes will have to continue waiting in airspace...");
+            } else if (airport.airportCapacity.get() == 0 && listOfPlanes.isEmpty()) {
                 System.out.println(threadName + "Queue empty. Simulation has ended.");
             }
         }
