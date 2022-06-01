@@ -9,34 +9,43 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
- * @author Ryan Ng
+ * @author Ng Lum Thyn TP061914
  */
 
 class Plane extends Thread {
-
+     
     int id;
     int passengersToDisembark;
     int passengersToBoard;
 
     boolean disembarked = false;
     boolean refueled = false;
-
+    
+    Statistics stat;
     PassengerRange pr;
     PlaneStates state;
     Airport airport;
     ATC atc;
+    
+    //AtomicInteger to keep count of the flow of passengers
     AtomicInteger passengerCount = new AtomicInteger(0);
 
-    Plane(int id, Airport airport, ATC atc) {
+    Plane(int id, Airport airport, ATC atc, Statistics stat) {
         this.id = id;
         this.airport = airport;
         this.atc = atc;
+        this.stat = stat;
         //Generate random amount of passengers wanting to board plane
-        this.passengersToBoard = (int) Math.floor(Math.random() * (PassengerRange.MAX.getValue() - PassengerRange.MIN.getValue() + 1) + PassengerRange.MIN.getValue());
+        this.passengersToBoard = (int) Math.floor(Math.random() * 
+                (PassengerRange.MAX.getValue() - PassengerRange.MIN.getValue() + 1) 
+                + PassengerRange.MIN.getValue());
         //Generate random amount of passengers wanting to disembark plane
-        this.passengersToDisembark = (int) Math.floor(Math.random() * (PassengerRange.MAX.getValue() - PassengerRange.MIN.getValue() + 1) + PassengerRange.MIN.getValue());
+        this.passengersToDisembark = (int) Math.floor(Math.random() * 
+                (PassengerRange.MAX.getValue() - PassengerRange.MIN.getValue() + 1) 
+                + PassengerRange.MIN.getValue());
         this.state = PlaneStates.WANTTOLAND;
-        System.out.println("Plane " + id + " has been generated.");
+        System.out.println("Plane " + id + " is arriving at the airport...");
+        //this.stat.setStartTime(System.nanoTime());
     }
     
     public void run() {
@@ -47,6 +56,8 @@ class Plane extends Thread {
             atc.checkRunwayForArrival(this);
         }
         
+        //this.stat.setEndTime(System.nanoTime());
+        //this.stat.calculateDuration();
         //Permission granted, plane acquired runway and is performing landing processes
         while (this.state == PlaneStates.ONRUNWAYARRIVAL) {
             try {
@@ -168,6 +179,7 @@ class Plane extends Thread {
             }
             if (this.passengerCount.get() == 0) {
                 System.out.println("All passengers have boarded Plane " + this.id + ".");
+                stat.noPassengerBoarded += passengersToBoard;
                 this.state = PlaneStates.LEAVEGATE;
             }
         }
@@ -212,9 +224,21 @@ class Plane extends Thread {
         if (this.state == PlaneStates.DEPARTED)
         {
             System.out.println("Plane " + this.id + " has left the airport." );
+            stat.planeCount += 1;
             atc.runway.runwaySem.release();
             airport.airportCapacity.decrementAndGet();
             atc.landPlaneOnRunway();
+        }
+        
+        //display stats 
+        try {
+            stat.statSem.acquire();
+            if (stat.statSem.availablePermits() == 0)
+            {
+                stat.displayStats(atc.gate);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
