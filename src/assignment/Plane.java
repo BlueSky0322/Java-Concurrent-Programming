@@ -102,7 +102,7 @@ class Plane extends Thread {
             if (!fuelTruckCheckingThreadSpawned) {
                 //using lambda expressions to generate daemon fueltruck thread
                 Thread fuelTruckCheckingThread = new Thread(() -> {
-                    while (true) {
+                    while (!refueled) {
                         //checks availibity of Fuel Truck
                         atc.checkFuelTruck(this);
                     }
@@ -110,7 +110,7 @@ class Plane extends Thread {
                 fuelTruckCheckingThread.start();
                 fuelTruckCheckingThreadSpawned = true;
             }
-
+            
             if (!passengerGeneratorSpawned) {
                 //using lambda expressions to generate daemon passengerGenerator thread
                 Thread passengerGenerator = new Thread(() -> {
