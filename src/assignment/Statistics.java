@@ -63,7 +63,7 @@ public class Statistics {
         avg = total / (duration.size() + 1);
         System.out.println("Average waiting time of planes: " + (avg / 1000000000) + " (seconds)");
 
-        System.out.println("Number of planes served: " + planeCount);
+        System.out.println("\nNumber of planes served: " + planeCount);
         System.out.println("Number of passengers boarded: " + noPassengerBoarded);
     }
 }
