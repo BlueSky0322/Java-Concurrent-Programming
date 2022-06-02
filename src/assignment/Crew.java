@@ -37,7 +37,7 @@ public class Crew extends Thread {
                         break;
                 }
                 //sleep to simulate tasks taken time to complete
-                Thread.sleep(1000);
+                Thread.sleep(700);
             }
         } catch (InterruptedException e) {
             System.out.println("Thread " + threadName + "interrupted.");
