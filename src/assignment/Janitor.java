@@ -36,7 +36,7 @@ public class Janitor extends Thread {
                         System.out.println("Plane " + plane.id + ": " + threadName + " empting trash...");
                         break;
                 }
-                Thread.sleep(1000);
+                Thread.sleep(700);
             }
         } catch (InterruptedException e) {
             System.out.println("Thread " + threadName + "interrupted.");
