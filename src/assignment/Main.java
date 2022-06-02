@@ -33,12 +33,5 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        
-        
-        try {
-            Thread.sleep(60000);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
     }
 }
