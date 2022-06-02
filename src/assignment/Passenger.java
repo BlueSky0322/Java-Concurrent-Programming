@@ -40,7 +40,7 @@ public class Passenger extends Thread {
         try {
             System.out.println("Passenger " + threadCount + ": I am disembarking from Plane " + plane.id + ".");
             //sleep to simulate passengers getting off the plane at different intervals
-            Thread.sleep((int) (Math.random() * 1000));
+            Thread.sleep((int) (Math.random() * 500));
             plane.passengerCount.decrementAndGet();
             this.movementState = false;
         } catch (InterruptedException e) {
@@ -53,7 +53,7 @@ public class Passenger extends Thread {
         try {
             System.out.println("Passenger " + threadCount + ": I am boarding Plane " + plane.id + ".");
             //sleep to simulate passengers boarding the plane at different intervals
-            Thread.sleep((int) (Math.random() * 1000));
+            Thread.sleep((int) (Math.random() * 500));
             plane.passengerCount.decrementAndGet();
             this.movementState = false;
         } catch (InterruptedException e) {
